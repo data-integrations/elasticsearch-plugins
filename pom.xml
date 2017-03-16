@@ -245,6 +245,12 @@
       <artifactId>elasticsearch</artifactId>
       <version>${es.version}</version>
     </dependency>
+    <dependency><!-- required by elasticsearch -->
+      <groupId>org.elasticsearch.plugin</groupId>
+      <artifactId>transport-netty4-client</artifactId>
+      <version>${es.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>transport</artifactId>

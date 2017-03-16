@@ -16,29 +16,22 @@
 
 package plugin.test;
 
-import co.cask.hydrator.plugin.batch.ESProperties;
-import co.cask.hydrator.plugin.batch.sink.BatchElasticsearchSink;
-import co.cask.hydrator.plugin.batch.source.ElasticsearchSource;
 import co.cask.cdap.api.artifact.ArtifactVersion;
 import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.api.dataset.table.Table;
 import co.cask.cdap.common.utils.Networks;
-import co.cask.cdap.common.utils.Tasks;
 import co.cask.cdap.datapipeline.DataPipelineApp;
 import co.cask.cdap.datapipeline.SmartWorkflow;
 import co.cask.cdap.etl.api.batch.BatchSink;
 import co.cask.cdap.etl.api.batch.BatchSource;
-import co.cask.cdap.etl.api.realtime.RealtimeSink;
 import co.cask.cdap.etl.mock.batch.MockSink;
 import co.cask.cdap.etl.mock.batch.MockSource;
 import co.cask.cdap.etl.mock.test.HydratorTestBase;
 import co.cask.cdap.etl.proto.v2.ETLBatchConfig;
 import co.cask.cdap.etl.proto.v2.ETLPlugin;
-import co.cask.cdap.etl.proto.v2.ETLRealtimeConfig;
 import co.cask.cdap.etl.proto.v2.ETLStage;
 import co.cask.cdap.etl.realtime.ETLRealtimeApplication;
-import co.cask.cdap.etl.realtime.ETLWorker;
 import co.cask.cdap.proto.ProgramRunStatus;
 import co.cask.cdap.proto.artifact.AppRequest;
 import co.cask.cdap.proto.artifact.ArtifactRange;
@@ -49,10 +42,12 @@ import co.cask.cdap.proto.id.NamespaceId;
 import co.cask.cdap.test.ApplicationManager;
 import co.cask.cdap.test.DataSetManager;
 import co.cask.cdap.test.TestConfiguration;
-import co.cask.cdap.test.WorkerManager;
 import co.cask.cdap.test.WorkflowManager;
 import co.cask.hydrator.common.Constants;
-import com.google.common.base.Charsets;
+import co.cask.hydrator.plugin.batch.ESProperties;
+import co.cask.hydrator.plugin.batch.sink.BatchElasticsearchSink;
+import co.cask.hydrator.plugin.batch.source.ElasticsearchSource;
+import co.cask.hydrator.plugin.realtime.RealtimeElasticsearchSink;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -65,7 +60,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.internal.InternalSettingsPreparer;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.transport.Netty4Plugin;
 import org.junit.After;
 import org.junit.Assert;
@@ -74,21 +68,18 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import co.cask.hydrator.plugin.realtime.RealtimeElasticsearchSink;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 
 /**
- * Unit test for co.cask.hydrator.plugin.batch {@link co.cask.hydrator.plugin.batch.sink.BatchElasticsearchSink} and {@link co.cask.hydrator.plugin.batch.source.ElasticsearchSource} classes.
+ * Unit test for co.cask.hydrator.plugin.batch {@link BatchElasticsearchSink} and {@link ElasticsearchSource} classes.
  */
 public class ETLESTest extends HydratorTestBase {
 
@@ -112,8 +103,6 @@ public class ETLESTest extends HydratorTestBase {
     new ArtifactSummary(BATCH_APP_ARTIFACT_ID.getArtifact(), BATCH_APP_ARTIFACT_ID.getVersion());
 
   private static final ArtifactId REALTIME_APP_ARTIFACT_ID = NamespaceId.DEFAULT.artifact("etlrealtime", VERSION);
-  private static final ArtifactSummary REALTIME_APP_ARTIFACT =
-    new ArtifactSummary(REALTIME_APP_ARTIFACT_ID.getArtifact(), REALTIME_APP_ARTIFACT_ID.getVersion());
 
   private static final ArtifactRange REALTIME_ARTIFACT_RANGE = new ArtifactRange(NamespaceId.DEFAULT, "etlrealtime",
                                                                                  CURRENT_VERSION, true,
@@ -171,11 +160,10 @@ public class ETLESTest extends HydratorTestBase {
   @After
   public void afterTest() throws IOException {
     try {
-      DeleteIndexResponse delete = client.admin().indices().delete(new DeleteIndexRequest("co/cask/hydrator/plugin/batch")).actionGet();
+      DeleteIndexResponse delete = client.admin().indices().delete(new DeleteIndexRequest("batch")).actionGet();
       Assert.assertTrue(delete.isAcknowledged());
     } finally {
       node.close();
-//      client.close();
     }
   }
 
@@ -183,7 +171,6 @@ public class ETLESTest extends HydratorTestBase {
   public void testES() throws Exception {
     testBatchESSink();
     testESSource();
-   // testRealtimeESSink();
   }
 
   private void testBatchESSink() throws Exception {
@@ -195,7 +182,7 @@ public class ETLESTest extends HydratorTestBase {
       "Elasticsearch",
       BatchSink.PLUGIN_TYPE,
       ImmutableMap.of(ESProperties.HOST, "127.0.0.1" + ":" + httpPort,
-                      ESProperties.INDEX_NAME, "co/cask/hydrator/plugin/batch",
+                      ESProperties.INDEX_NAME, "batch",
                       ESProperties.TYPE_NAME, "testing",
                       ESProperties.ID_FIELD, "ticker",
                       Constants.Reference.REFERENCE_NAME, "BatchESSinkTest"),
@@ -221,17 +208,17 @@ public class ETLESTest extends HydratorTestBase {
     workflowManager.start();
     workflowManager.waitForRuns(ProgramRunStatus.COMPLETED, 1, 5, TimeUnit.MINUTES);
 
-    SearchResponse searchResponse = client.prepareSearch("co/cask/hydrator/plugin/batch").execute().actionGet();
+    SearchResponse searchResponse = client.prepareSearch("batch").execute().actionGet();
     Assert.assertEquals(2, searchResponse.getHits().getTotalHits());
     searchResponse = client.prepareSearch().setQuery(matchQuery("ticker", "AAPL")).execute().actionGet();
     Assert.assertEquals(1, searchResponse.getHits().getTotalHits());
-    Assert.assertEquals("co/cask/hydrator/plugin/batch", searchResponse.getHits().getAt(0).getIndex());
+    Assert.assertEquals("batch", searchResponse.getHits().getAt(0).getIndex());
     Assert.assertEquals("testing", searchResponse.getHits().getAt(0).getType());
     Assert.assertEquals("AAPL", searchResponse.getHits().getAt(0).getId());
     searchResponse = client.prepareSearch().setQuery(matchQuery("ticker", "ABCD")).execute().actionGet();
     Assert.assertEquals(0, searchResponse.getHits().getTotalHits());
 
-    DeleteResponse response = client.prepareDelete("co/cask/hydrator/plugin/batch", "testing", "CDAP").execute().actionGet();
+    DeleteResponse response = client.prepareDelete("batch", "testing", "CDAP").execute().actionGet();
     Assert.assertEquals(response.status().getStatus(), 200);
   }
 
@@ -242,7 +229,7 @@ public class ETLESTest extends HydratorTestBase {
       BatchSource.PLUGIN_TYPE,
       ImmutableMap.<String, String>builder()
         .put(ESProperties.HOST, "127.0.0.1" + ":" + httpPort)
-        .put(ESProperties.INDEX_NAME, "co/cask/hydrator/plugin/batch")
+        .put(ESProperties.INDEX_NAME, "batch")
         .put(ESProperties.TYPE_NAME, "testing")
         .put(ESProperties.QUERY, "?q=*")
         .put(ESProperties.SCHEMA, TICKER_SCHEMA.toString())
@@ -273,94 +260,5 @@ public class ETLESTest extends HydratorTestBase {
     Assert.assertEquals(10, (int) row1.get("num"));
     Assert.assertEquals(500.32f, (float) row1.get("price"), 0.0f);
     Assert.assertNull(row1.get("NOT_IMPORTED"));
-  }
-
-  private void testRealtimeESSink() throws Exception {
-
-    Schema schema = Schema.recordOf(
-      "user",
-      Schema.Field.of("id", Schema.of(Schema.Type.INT)),
-      Schema.Field.of("name", Schema.of(Schema.Type.STRING)),
-      Schema.Field.of("score", Schema.of(Schema.Type.DOUBLE)),
-      Schema.Field.of("graduated", Schema.of(Schema.Type.BOOLEAN)),
-      Schema.Field.of("binary", Schema.of(Schema.Type.BYTES)),
-      Schema.Field.of("time", Schema.of(Schema.Type.LONG))
-    );
-    List<StructuredRecord> input = ImmutableList.of(
-      StructuredRecord.builder(schema)
-        .set("id", 1)
-        .set("name", "Bob")
-        .set("score", 3.4)
-        .set("graduated", false)
-        .set("binary", "Bob".getBytes(Charsets.UTF_8))
-        .set("time", System.currentTimeMillis())
-        .build()
-    );
-    ETLStage source = new ETLStage("source", co.cask.cdap.etl.mock.realtime.MockSource.getPlugin(input));
-
-    ETLStage sink = new ETLStage("Elasticsearch", new ETLPlugin(
-      "Elasticsearch",
-      RealtimeSink.PLUGIN_TYPE,
-      ImmutableMap.<String, String>builder()
-        .put(ESProperties.TRANSPORT_ADDRESSES, "127.0.0.1" + ":" + transportPort)
-        .put(ESProperties.CLUSTER, "testcluster")
-        .put(ESProperties.INDEX_NAME, "co/cask/hydrator/plugin/realtime")
-        .put(ESProperties.TYPE_NAME, "testing")
-        .put(ESProperties.ID_FIELD, "name")
-        .put(Constants.Reference.REFERENCE_NAME, "ESSinkTest")
-        .build(),
-      null));
-    ETLRealtimeConfig etlConfig = ETLRealtimeConfig.builder()
-      .addStage(source)
-      .addStage(sink)
-      .addConnection(source.getName(), sink.getName())
-      .build();
-
-    try {
-      ApplicationId appId = NamespaceId.DEFAULT.app("testRealtimeSink");
-      AppRequest<ETLRealtimeConfig> appRequest = new AppRequest<>(REALTIME_APP_ARTIFACT, etlConfig);
-      ApplicationManager appManager = deployApplication(appId, appRequest);
-
-      WorkerManager workerManager = appManager.getWorkerManager(ETLWorker.NAME);
-
-      workerManager.start();
-      Tasks.waitFor(1L, new Callable<Long>() {
-        @Override
-        public Long call() throws Exception {
-          try {
-            SearchResponse searchResponse = client.prepareSearch("co/cask/hydrator/plugin/realtime").execute().actionGet();
-            return searchResponse.getHits().getTotalHits();
-          } catch (Exception e) {
-            //the index test won't exist until the run is finished
-            return 0L;
-          }
-        }
-      }, 15, TimeUnit.SECONDS, 50, TimeUnit.MILLISECONDS);
-      workerManager.stop();
-
-      SearchResponse searchResponse = client.prepareSearch("co/cask/hydrator/plugin/realtime").execute().actionGet();
-      Map<String, Object> result = searchResponse.getHits().getAt(0).getSource();
-
-      Assert.assertEquals(1, (int) result.get("id"));
-      Assert.assertEquals("Bob", result.get("name"));
-      Assert.assertEquals(3.4f,  (float) result.get("score"), 0.0f);
-      Assert.assertEquals(false, result.get("graduated"));
-      Assert.assertNotNull(result.get("time"));
-
-      searchResponse = client.prepareSearch().setQuery(matchQuery("score", "3.4")).execute().actionGet();
-      Assert.assertEquals(1, searchResponse.getHits().getTotalHits());
-      SearchHit hit = searchResponse.getHits().getAt(0);
-      Assert.assertEquals("co/cask/hydrator/plugin/realtime", hit.getIndex());
-      Assert.assertEquals("testing", hit.getType());
-      Assert.assertEquals("Bob", hit.getId());
-      searchResponse = client.prepareSearch().setQuery(matchQuery("name", "ABCD")).execute().actionGet();
-      Assert.assertEquals(0, searchResponse.getHits().getTotalHits());
-
-      DeleteResponse response = client.prepareDelete("co/cask/hydrator/plugin/realtime", "testing", "Bob").execute().actionGet();
-      Assert.assertEquals(response.status().getStatus(), 200);
-    } finally {
-      DeleteIndexResponse delete = client.admin().indices().delete(new DeleteIndexRequest("co/cask/hydrator/plugin/realtime")).actionGet();
-      Assert.assertTrue(delete.isAcknowledged());
-    }
   }
 }
