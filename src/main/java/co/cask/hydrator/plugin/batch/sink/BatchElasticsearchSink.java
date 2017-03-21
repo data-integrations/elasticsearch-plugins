@@ -64,7 +64,7 @@ public class BatchElasticsearchSink extends ReferenceBatchSink<StructuredRecord,
     job.setSpeculativeExecution(false);
 
     conf.set("es.nodes", config.hostname);
-    conf.set("es.resource", String.format("%s/%s", config.index, config.type));
+    conf.set("es.resource.write", String.format("%s/%s", config.index, config.type));
     conf.set("es.input.json", "yes");
     conf.set("es.mapping.id", config.idField);
 
@@ -73,7 +73,6 @@ public class BatchElasticsearchSink extends ReferenceBatchSink<StructuredRecord,
 
   @Override
   public void transform(StructuredRecord record, Emitter<KeyValue<Writable, Writable>> emitter) throws Exception {
-    Text text = new Text(StructuredRecordStringConverter.toJsonString(record));
     emitter.emit(new KeyValue<Writable, Writable>(new Text(StructuredRecordStringConverter.toJsonString(record)),
                                                   new Text(StructuredRecordStringConverter.toJsonString(record))));
   }
