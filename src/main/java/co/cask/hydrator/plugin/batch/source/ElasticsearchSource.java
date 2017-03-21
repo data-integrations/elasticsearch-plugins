@@ -82,7 +82,7 @@ public class ElasticsearchSource extends ReferenceBatchSource<Text, MapWritable,
 
     job.setSpeculativeExecution(false);
     conf.set("es.nodes", config.hostname);
-    conf.set("es.resource", getResource());
+    conf.set("es.resource.read", getResource());
     conf.set("es.query", config.query);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(MapWritable.class);
