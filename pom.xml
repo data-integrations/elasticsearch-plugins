@@ -69,8 +69,8 @@
     <hadoop.version>2.3.0</hadoop.version>
     <junit.version>4.11</junit.version>
     <hydrator.version>1.7.0</hydrator.version>
-    <es.version>5.2.2</es.version>
-    <es-hadoop.version>5.2.2</es-hadoop.version>
+    <es.version>5.4.0</es.version>
+    <es-hadoop.version>5.4.0</es-hadoop.version>
     <widgets.dir>widgets</widgets.dir>
     <slf4j.version>1.7.5</slf4j.version>
     <netty.version>4.0.30.Final</netty.version>
