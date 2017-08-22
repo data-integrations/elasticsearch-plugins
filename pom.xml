@@ -6,7 +6,7 @@
 
   <groupId>co.cask.hydrator</groupId>
   <artifactId>elasticsearch-plugins</artifactId>
-  <version>1.6.1-5.2.2</version>
+  <version>1.8.0</version>
 
   <licenses>
     <license>
@@ -65,12 +65,12 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdap.version>4.1.0</cdap.version>
+    <cdap.version>4.2.0</cdap.version>
     <hadoop.version>2.3.0</hadoop.version>
     <junit.version>4.11</junit.version>
-    <hydrator.version>1.6.0</hydrator.version>
-    <es.version>5.2.2</es.version>
-    <es-hadoop.version>5.2.2</es-hadoop.version>
+    <hydrator.version>1.7.0</hydrator.version>
+    <es.version>5.4.0</es.version>
+    <es-hadoop.version>5.4.0</es-hadoop.version>
     <widgets.dir>widgets</widgets.dir>
     <slf4j.version>1.7.5</slf4j.version>
     <netty.version>4.0.30.Final</netty.version>
@@ -80,7 +80,7 @@
     <junit.version>4.11</junit.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <docs.dir>docs</docs.dir>
-    <app.parents>system:cdap-etl-batch[4.1.0,4.2.0-SNAPSHOT),system:cdap-data-pipeline[4.1.0,4.2.0-SNAPSHOT),system:cdap-data-streams[4.1.0,4.2.0-SNAPSHOT)</app.parents>
+    <app.parents>system:cdap-data-pipeline[4.3.0-SNAPSHOT,5.0.0-SNAPSHOT),system:cdap-data-streams[4.3.0-SNAPSHOT,5.0.0-SNAPSHOT)</app.parents>
     <!-- this is here because project.basedir evaluates to null in the script build step -->
     <main.basedir>${project.basedir}</main.basedir>
   </properties>
