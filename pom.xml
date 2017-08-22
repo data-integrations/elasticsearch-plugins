@@ -6,7 +6,7 @@
 
   <groupId>co.cask.hydrator</groupId>
   <artifactId>elasticsearch-plugins</artifactId>
-  <version>1.7.1</version>
+  <version>1.8.0</version>
 
   <licenses>
     <license>
@@ -80,7 +80,7 @@
     <junit.version>4.11</junit.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <docs.dir>docs</docs.dir>
-    <app.parents>system:cdap-etl-batch[4.2.0,4.3.0-SNAPSHOT),system:cdap-data-pipeline[4.2.0,4.3.0-SNAPSHOT),system:cdap-data-streams[4.2.0,4.3.0-SNAPSHOT)</app.parents>
+    <app.parents>system:cdap-data-pipeline[4.3.0-SNAPSHOT,5.0.0-SNAPSHOT),system:cdap-data-streams[4.3.0-SNAPSHOT,5.0.0-SNAPSHOT)</app.parents>
     <!-- this is here because project.basedir evaluates to null in the script build step -->
     <main.basedir>${project.basedir}</main.basedir>
   </properties>
