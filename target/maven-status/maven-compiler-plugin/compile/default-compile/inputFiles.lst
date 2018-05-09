@@ -1,0 +1,4 @@
+/home/erandal/IdeaProjects/elasticsearch-plugins/src/main/java/co/cask/hydrator/plugin/batch/RecordWritableConverter.java
+/home/erandal/IdeaProjects/elasticsearch-plugins/src/main/java/co/cask/hydrator/plugin/batch/source/ElasticsearchSource.java
+/home/erandal/IdeaProjects/elasticsearch-plugins/src/main/java/co/cask/hydrator/plugin/batch/sink/BatchElasticsearchSink.java
+/home/erandal/IdeaProjects/elasticsearch-plugins/src/main/java/co/cask/hydrator/plugin/batch/ESProperties.java

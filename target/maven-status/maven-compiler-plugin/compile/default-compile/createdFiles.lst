@@ -1,0 +1,7 @@
+co/cask/hydrator/plugin/batch/source/ElasticsearchSource$ESConfig.class
+co/cask/hydrator/plugin/batch/source/ElasticsearchSource.class
+co/cask/hydrator/plugin/batch/ESProperties.class
+co/cask/hydrator/plugin/batch/sink/BatchElasticsearchSink.class
+co/cask/hydrator/plugin/batch/RecordWritableConverter$1.class
+co/cask/hydrator/plugin/batch/sink/BatchElasticsearchSink$ESConfig.class
+co/cask/hydrator/plugin/batch/RecordWritableConverter.class
