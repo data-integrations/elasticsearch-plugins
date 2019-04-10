@@ -1,6 +1,6 @@
 # Elasticsearch Plugins
 
-[![cm-available](https://cdap-users.herokuapp.com/assets/cm-available.svg)](https://docs.cask.co/cdap/current/en/integrations/cask-market.html)
+[![cm-available](https://cdap-users.herokuapp.com/assets/cm-available.svg)](https://docs.cdap.io/cdap/current/en/integrations/cask-market.html)
 ![cdap-batch-source](https://cdap-users.herokuapp.com/assets/cdap-batch-source.svg)
 ![cdap-batch-sink](https://cdap-users.herokuapp.com/assets/cdap-batch-sink.svg)
 ![cdap-realtime-sink](https://cdap-users.herokuapp.com/assets/cdap-realtime-sink.svg)
@@ -46,7 +46,7 @@ You can build without running tests: ``mvn clean install -DskipTests``
 
 Limitations
 -----------
-- UI doesn't support schema's with hyphens (-), so the plugin currently transforms all the schemas with - into underscores (_). This change will be reverted after this is fixed: https://issues.cask.co/browse/HYDRATOR-1125
+- UI doesn't support schema's with hyphens (-), so the plugin currently transforms all the schemas with - into underscores (_). This change will be reverted after this is fixed: https://issues.cask.co/browse/CDAP-10099
 
 Mailing Lists
 -------------
@@ -84,4 +84,4 @@ Cask is a trademark of Cask Data, Inc. All rights reserved.
 Apache, Apache HBase, and HBase are trademarks of The Apache Software Foundation. Used with
 permission. No endorsement by The Apache Software Foundation is implied by the use of these marks.
 
-.. |(Hydrator)| image:: http://cask.co/wp-content/uploads/hydrator_logo_cdap1.png
+.. |(Hydrator)| image:: http://cdap.io/wp-content/uploads/hydrator_logo_cdap1.png
