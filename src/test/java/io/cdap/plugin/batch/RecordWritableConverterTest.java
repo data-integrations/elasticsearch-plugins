@@ -14,13 +14,12 @@
  * the License.
  */
 
-package plugin.batch;
+package io.cdap.plugin.batch;
 
-import co.cask.hydrator.plugin.batch.RecordWritableConverter;
-import co.cask.cdap.api.data.format.StructuredRecord;
-import co.cask.cdap.api.data.schema.Schema;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import io.cdap.cdap.api.data.format.StructuredRecord;
+import io.cdap.cdap.api.data.schema.Schema;
 import org.apache.hadoop.io.MapWritable;
 import org.junit.Assert;
 import org.junit.Test;

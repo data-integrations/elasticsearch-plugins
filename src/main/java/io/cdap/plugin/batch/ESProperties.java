@@ -1,4 +1,4 @@
-package co.cask.hydrator.plugin.batch;
+package io.cdap.plugin.batch;
 
 /**
  * Constants for ElasticSearch plugins.
