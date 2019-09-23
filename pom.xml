@@ -21,7 +21,7 @@
 
   <groupId>io.cdap.plugins</groupId>
   <artifactId>elasticsearch-plugins</artifactId>
-  <version>1.9.0</version>
+  <version>1.10.0</version>
 
   <licenses>
     <license>
