@@ -34,7 +34,7 @@
     </encoder>
   </appender>
 
-  <logger name="co.cask.hydrator" level="INFO" />
+  <logger name="io.cdap.plugin" level="INFO" />
   <logger name="org.elasticsearch" level="DEBUG" />
 
   <root level="WARN">
