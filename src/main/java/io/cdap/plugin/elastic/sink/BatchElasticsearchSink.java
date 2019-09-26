@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.batch.sink;
+package io.cdap.plugin.elastic.sink;
 
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
@@ -27,11 +27,12 @@ import io.cdap.cdap.etl.api.Emitter;
 import io.cdap.cdap.etl.api.batch.BatchSink;
 import io.cdap.cdap.etl.api.batch.BatchSinkContext;
 import io.cdap.cdap.format.StructuredRecordStringConverter;
-import io.cdap.plugin.batch.ESProperties;
+
 import io.cdap.plugin.common.ReferenceBatchSink;
 import io.cdap.plugin.common.ReferencePluginConfig;
 import io.cdap.plugin.common.batch.JobUtils;
 import io.cdap.plugin.common.batch.sink.SinkOutputFormatProvider;
+import io.cdap.plugin.elastic.ESProperties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;

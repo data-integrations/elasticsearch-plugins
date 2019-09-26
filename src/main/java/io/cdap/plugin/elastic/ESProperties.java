@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.batch;
+package io.cdap.plugin.elastic;
 
 /**
  * Constants for ElasticSearch plugins.

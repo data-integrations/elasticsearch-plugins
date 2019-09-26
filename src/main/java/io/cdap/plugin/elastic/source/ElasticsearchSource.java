@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.batch.source;
+package io.cdap.plugin.elastic.source;
 
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
@@ -29,12 +29,12 @@ import io.cdap.cdap.etl.api.PipelineConfigurer;
 import io.cdap.cdap.etl.api.batch.BatchRuntimeContext;
 import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
-import io.cdap.plugin.batch.ESProperties;
-import io.cdap.plugin.batch.RecordWritableConverter;
 import io.cdap.plugin.common.ReferenceBatchSource;
 import io.cdap.plugin.common.ReferencePluginConfig;
 import io.cdap.plugin.common.SourceInputFormatProvider;
 import io.cdap.plugin.common.batch.JobUtils;
+import io.cdap.plugin.elastic.ESProperties;
+import io.cdap.plugin.elastic.RecordWritableConverter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
