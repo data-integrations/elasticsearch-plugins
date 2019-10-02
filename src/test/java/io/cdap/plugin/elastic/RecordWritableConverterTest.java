@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.batch;
+package io.cdap.plugin.elastic;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;

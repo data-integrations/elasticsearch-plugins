@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.batch;
+package io.cdap.plugin.elastic;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
