@@ -17,7 +17,6 @@
 package io.cdap.plugin.elastic.source;
 
 import io.cdap.cdap.api.annotation.Description;
-import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.annotation.Plugin;
 import io.cdap.cdap.api.data.batch.Input;
@@ -25,23 +24,20 @@ import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.lib.KeyValue;
 import io.cdap.cdap.etl.api.Emitter;
+import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.PipelineConfigurer;
+import io.cdap.cdap.etl.api.StageConfigurer;
 import io.cdap.cdap.etl.api.batch.BatchRuntimeContext;
 import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
-import io.cdap.plugin.common.ReferenceBatchSource;
-import io.cdap.plugin.common.ReferencePluginConfig;
 import io.cdap.plugin.common.SourceInputFormatProvider;
 import io.cdap.plugin.common.batch.JobUtils;
-import io.cdap.plugin.elastic.ESProperties;
 import io.cdap.plugin.elastic.RecordWritableConverter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.elasticsearch.hadoop.mr.EsInputFormat;
-
-import java.io.IOException;
 
 /**
  * A {@link BatchSource} that writes data to Elasticsearch.
@@ -51,55 +47,48 @@ import java.io.IOException;
  * </p>
  * An exception will be thrown if the type of any of the fields do not match the type specified by the user.
  */
-@Plugin(type = "batchsource")
+@Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name("Elasticsearch")
 @Description("Elasticsearch Batch Source pulls documents from Elasticsearch " +
   "according to the query specified by the user and converts each document to a structured record ")
-public class ElasticsearchSource extends ReferenceBatchSource<Text, MapWritable, StructuredRecord> {
-  private static final String INDEX_DESCRIPTION = "The name of the index to query.";
-  private static final String TYPE_DESCRIPTION = "The name of the type where the data is stored.";
-  private static final String QUERY_DESCRIPTION = "The query to use to import data from the specified index. " +
-    "See Elasticsearch for query examples.";
-  private static final String HOST_DESCRIPTION = "The hostname and port for the Elasticsearch instance; " +
-    "for example, localhost:9200.";
-  private static final String SCHEMA_DESCRIPTION = "The schema or mapping of the data in Elasticsearch.";
-
-  private final ESConfig config;
+public class ElasticsearchSource extends BatchSource<Text, MapWritable, StructuredRecord> {
+  private final ElasticsearchSourceConfig config;
   private Schema schema;
 
-  public ElasticsearchSource(ESConfig config) {
-    super(config);
+  public ElasticsearchSource(ElasticsearchSourceConfig config) {
     this.config = config;
-  }
-
-  private String getResource() {
-    return String.format("%s/%s", config.index, config.type);
   }
 
   @Override
   public void initialize(BatchRuntimeContext context) {
-    schema = parseSchema();
+    schema = config.getParseSchema();
   }
 
   @Override
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
-    super.configurePipeline(pipelineConfigurer);
-    try {
-      pipelineConfigurer.getStageConfigurer().setOutputSchema(Schema.parseJson(config.schema));
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Invalid output schema : " + e.getMessage(), e);
-    }
+    StageConfigurer stageConfigurer = pipelineConfigurer.getStageConfigurer();
+    FailureCollector collector = stageConfigurer.getFailureCollector();
+
+    config.validate(collector);
+    collector.getOrThrowException();
+
+    Schema schema = config.getParseSchema();
+    stageConfigurer.setOutputSchema(schema);
   }
 
   @Override
   public void prepareRun(BatchSourceContext context) throws Exception {
+    FailureCollector collector = context.getFailureCollector();
+    config.validate(collector);
+    collector.getOrThrowException();
+
     Job job = JobUtils.createInstance();
     Configuration conf = job.getConfiguration();
 
     job.setSpeculativeExecution(false);
-    conf.set("es.nodes", config.hostname);
-    conf.set("es.resource.read", getResource());
-    conf.set("es.query", config.query);
+    conf.set("es.nodes", config.getHostname());
+    conf.set("es.resource.read", config.getResource());
+    conf.set("es.query", config.getQuery());
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(MapWritable.class);
     context.setInput(Input.of(config.referenceName, new SourceInputFormatProvider(EsInputFormat.class, conf)));
@@ -108,51 +97,5 @@ public class ElasticsearchSource extends ReferenceBatchSource<Text, MapWritable,
   @Override
   public void transform(KeyValue<Text, MapWritable> input, Emitter<StructuredRecord> emitter) throws Exception {
     emitter.emit(RecordWritableConverter.convertToRecord(input.getValue(), schema));
-  }
-
-  private Schema parseSchema() {
-    try {
-      return Schema.parseJson(config.schema);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Invalid schema: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Config class for Batch {@link ElasticsearchSource}.
-   */
-  public static class ESConfig extends ReferencePluginConfig {
-    @Name(ESProperties.HOST)
-    @Description(HOST_DESCRIPTION)
-    @Macro
-    private String hostname;
-
-    @Name(ESProperties.INDEX_NAME)
-    @Description(INDEX_DESCRIPTION)
-    @Macro
-    private String index;
-
-    @Name(ESProperties.TYPE_NAME)
-    @Description(TYPE_DESCRIPTION)
-    @Macro
-    private String type;
-
-    @Name(ESProperties.QUERY)
-    @Description(QUERY_DESCRIPTION)
-    @Macro
-    private String query;
-
-    @Name(ESProperties.SCHEMA)
-    @Description(SCHEMA_DESCRIPTION)
-    private String schema;
-
-    public ESConfig(String referenceName, String hostname, String index, String type, String query, String schema) {
-      super(referenceName);
-      this.hostname = hostname;
-      this.index = index;
-      this.type = type;
-      this.schema = schema;
-      this.query = query;
-    }
   }
 }
