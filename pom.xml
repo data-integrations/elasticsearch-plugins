@@ -80,12 +80,12 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdap.version>6.1.0-SNAPSHOT</cdap.version>
+    <cdap.version>6.1.1</cdap.version>
     <hadoop.version>2.3.0</hadoop.version>
     <junit.version>4.11</junit.version>
     <hydrator.version>2.3.0-SNAPSHOT</hydrator.version>
-    <es.version>5.4.0</es.version>
-    <es-hadoop.version>5.4.0</es-hadoop.version>
+    <es.version>7.5.2</es.version>
+    <es-hadoop.version>7.5.2</es-hadoop.version>
     <slf4j.version>1.7.5</slf4j.version>
     <netty.version>4.0.30.Final</netty.version>
     <log4j.version>2.7</log4j.version>
@@ -320,7 +320,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.5.4</version>
+          <version>4.2.1</version>
           <extensions>true</extensions>
           <configuration>
             <instructions>
@@ -348,8 +348,8 @@
           <version>1.1.0</version>
           <configuration>
             <cdapArtifacts>
-              <parent>system:cdap-data-pipeline[6.1.0-SNAPSHOT,7.0.0-SNAPSHOT)</parent>
-              <parent>system:cdap-data-streams[6.1.0-SNAPSHOT,7.0.0-SNAPSHOT)</parent>
+              <parent>system:cdap-data-pipeline[6.1.1,7.0.0)</parent>
+              <parent>system:cdap-data-streams[6.1.1,7.0.0)</parent>
             </cdapArtifacts>
           </configuration>
           <executions>
