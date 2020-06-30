@@ -13,7 +13,7 @@ in an index and type from Elasticsearch and store the data in an HBase table.
 
 Configuration
 -------------
-**referenceName:** This will be used to uniquely identify this source for lineage, annotating metadata, etc.
+**Reference Name:** This will be used to uniquely identify this source for lineage, annotating metadata, etc.
 
 **es.host:** The hostname and port for the Elasticsearch instance. (Macro-enabled)
 
@@ -26,6 +26,9 @@ see Elasticsearch for additional query examples. (Macro-enabled)
 
 **schema:** The schema or mapping of the data in Elasticsearch.
 
+**Additional Properties:** Additional properties to use with the es-hadoop client when reading the data, 
+documented at [elastic.co](https://www.elastic.co/guide/en/elasticsearch/hadoop/current/configuration.html). 
+(Macro-enabled)
 
 Example
 -------
@@ -48,5 +51,28 @@ All data from the index will be read on each run:
                   {\"name\":\"id\",\"type\":\"long\"},
                   {\"name\":\"name\",\"type\":\"string\"},
                   {\"name\":\"age\",\"type\":\"int\"}]}"
+        }
+    }
+
+This example connects to Elasticsearch, which is running in a remote restricted environment (e.g. elastic.co),
+and reads in records in the specified index (*megacorp*) and type (*employee*) which match the query to 
+(in this case) select all records. All data from the index will be read on each run:
+
+    {
+        "name": "Elasticsearch",
+        "type": "batchsource",
+        "properties": {
+            "es.host": "https://remote.region.gcp.cloud.es.io:9243",
+            "es.index": "megacorp",
+            "es.type": "employee",
+            "query": "?q=*",
+            "schema": "{
+                \"type\":\"record\",
+                \"name\":\"etlSchemaBody\",
+                \"fields\":[
+                  {\"name\":\"id\",\"type\":\"long\"},
+                  {\"name\":\"name\",\"type\":\"string\"},
+                  {\"name\":\"age\",\"type\":\"int\"}]}",
+            "additionalProperties": "es.net.http.auth.user=username\nes.net.http.auth.pass=password\nes.nodes.wan.only=true"
         }
     }

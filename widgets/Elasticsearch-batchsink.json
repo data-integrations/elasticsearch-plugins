@@ -31,6 +31,18 @@
           "widget-type": "textbox",
           "label": "ID Field",
           "name": "es.idField"
+        },
+        {
+          "widget-type": "keyvalue",
+          "label": "Additional Properties",
+          "name": "additionalProperties",
+          "widget-attributes": {
+            "showDelimiter": "false",
+            "delimiter": "\n",
+            "kv-delimiter": "=",
+            "key-placeholder": "Property Name",
+            "value-placeholder": "Property Value"
+          }
         }
       ]
     }

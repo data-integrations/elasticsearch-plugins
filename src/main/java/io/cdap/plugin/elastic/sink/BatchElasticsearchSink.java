@@ -83,6 +83,7 @@ public class BatchElasticsearchSink extends BatchSink<StructuredRecord, Writable
     conf.set("es.resource.write", config.getResource());
     conf.set("es.input.json", "yes");
     conf.set("es.mapping.id", config.getIdField());
+    config.getAdditionalPropertiesMap().forEach((k, v) -> conf.set(k, v));
 
     context.addOutput(Output.of(config.referenceName, new SinkOutputFormatProvider(EsOutputFormat.class, conf)));
   }

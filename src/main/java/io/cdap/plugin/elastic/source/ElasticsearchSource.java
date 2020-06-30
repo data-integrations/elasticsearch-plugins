@@ -89,6 +89,7 @@ public class ElasticsearchSource extends BatchSource<Text, MapWritable, Structur
     conf.set("es.nodes", config.getHostname());
     conf.set("es.resource.read", config.getResource());
     conf.set("es.query", config.getQuery());
+    config.getAdditionalPropertiesMap().forEach((k, v) -> conf.set(k, v));
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(MapWritable.class);
     context.setInput(Input.of(config.referenceName, new SourceInputFormatProvider(EsInputFormat.class, conf)));
