@@ -35,7 +35,8 @@ public class ElasticsearchSourceConfigTest {
     "test",
     "test",
     "?q=*",
-    Schema.recordOf("record", Schema.Field.of("id", Schema.of(Schema.Type.LONG))).toString()
+    Schema.recordOf("record", Schema.Field.of("id", Schema.of(Schema.Type.LONG))).toString(),
+    null
   );
 
   @Test
@@ -59,12 +60,45 @@ public class ElasticsearchSourceConfigTest {
   @Test
   public void testInvalidHostname() {
     ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("abc:abc:abc:abc")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testInvalidHostProtocol() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
       .setHostname("abc:abc:abc")
       .build();
 
     MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
     config.validate(failureCollector);
     ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testValidHttpHostname() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("http://abc:9200")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    Assert.assertTrue(failureCollector.getValidationFailures().isEmpty());
+  }
+
+  @Test
+  public void testValidHttpsHostName() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("https://abc:9200")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    Assert.assertTrue(failureCollector.getValidationFailures().isEmpty());
   }
 
   @Test
@@ -101,6 +135,28 @@ public class ElasticsearchSourceConfigTest {
   }
 
   @Test
+  public void testEmptyPortWithHttpHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("http://abc:")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testEmptyPortWithHttpsHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("https://abc:")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
   public void testInvalidPort() {
     ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
       .setHostname("abc:abc")
@@ -112,9 +168,53 @@ public class ElasticsearchSourceConfigTest {
   }
 
   @Test
+  public void testInvalidPortWithHttpHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("http://abc:abc")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testInvalidPortWithHttpsHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("https://abc:abc")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
   public void testInvalidNumberInPort() {
     ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
       .setHostname("abc:100000")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testInvalidNumberInPortWithHttpHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("http://abc:100000")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.HOST);
+  }
+
+  @Test
+  public void testInvalidNumberInPortWithHttpsHost() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setHostname("https://abc:100000")
       .build();
 
     MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
@@ -175,5 +275,51 @@ public class ElasticsearchSourceConfigTest {
     MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
     config.validate(failureCollector);
     ValidationAssertions.assertPropertyValidationFailed(failureCollector, ElasticsearchSourceConfig.SCHEMA);
+  }
+
+  @Test
+  public void testEmptyAdditionalProperties() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setAdditionalProperties("")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    Assert.assertTrue(failureCollector.getValidationFailures().isEmpty());
+  }
+
+  @Test
+  public void testInvalidAdditionalProperties() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setAdditionalProperties("es.net.http.auth.user")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector,
+      ElasticsearchSourceConfig.ADDITIONAL_PROPERTIES);
+  }
+
+  @Test
+  public void testValidAdditionalProperties() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setAdditionalProperties("es.nodes.wan.only=true")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    Assert.assertTrue(failureCollector.getValidationFailures().isEmpty());
+  }
+
+  @Test
+  public void testValidAdditionalPropertiesWithEmptyKey() {
+    ElasticsearchSourceConfig config = ElasticsearchSourceConfig.newBuilder(VALID_CONFIG)
+      .setAdditionalProperties("es.nodes.wan.only=true;=false")
+      .build();
+
+    MockFailureCollector failureCollector = new MockFailureCollector(MOCK_STAGE);
+    config.validate(failureCollector);
+    ValidationAssertions.assertPropertyValidationFailed(failureCollector,
+      ElasticsearchSourceConfig.ADDITIONAL_PROPERTIES);
   }
 }

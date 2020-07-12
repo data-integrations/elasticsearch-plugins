@@ -46,14 +46,14 @@ public class ElasticsearchSourceConfig extends BaseElasticsearchConfig {
   private final String schema;
 
   public ElasticsearchSourceConfig(String referenceName, String hostname, String index, String type, String query,
-                                   String schema) {
-    super(referenceName, hostname, index, type);
+                                   String schema, String additionalProperties) {
+    super(referenceName, hostname, index, type, additionalProperties);
     this.schema = schema;
     this.query = query;
   }
 
   private ElasticsearchSourceConfig(Builder builder) {
-    super(builder.referenceName, builder.hostname, builder.index, builder.type);
+    super(builder.referenceName, builder.hostname, builder.index, builder.type, builder.additionalProperties);
     query = builder.query;
     schema = builder.schema;
   }
@@ -70,6 +70,7 @@ public class ElasticsearchSourceConfig extends BaseElasticsearchConfig {
     builder.type = copy.getType();
     builder.query = copy.getQuery();
     builder.schema = copy.getSchema();
+    builder.additionalProperties = copy.getAdditionalProperties();
     return builder;
   }
 
@@ -118,6 +119,7 @@ public class ElasticsearchSourceConfig extends BaseElasticsearchConfig {
     private String type;
     private String query;
     private String schema;
+    private String additionalProperties;
 
     private Builder() {
     }
@@ -149,6 +151,11 @@ public class ElasticsearchSourceConfig extends BaseElasticsearchConfig {
 
     public Builder setSchema(String schema) {
       this.schema = schema;
+      return this;
+    }
+
+    public Builder setAdditionalProperties(String additionalProperties) {
+      this.additionalProperties = additionalProperties;
       return this;
     }
 

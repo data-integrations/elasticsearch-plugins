@@ -22,20 +22,29 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.IdUtils;
+import io.cdap.plugin.common.KeyValueListParser;
 import io.cdap.plugin.common.ReferencePluginConfig;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * Basic config class for Elasticsearch plugin.
  */
 public abstract class BaseElasticsearchConfig extends ReferencePluginConfig {
+
   public static final String INDEX_NAME = "es.index";
   public static final String TYPE_NAME = "es.type";
   public static final String HOST = "es.host";
+  public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
 
   private static final String HOST_DESCRIPTION = "The hostname and port for the Elasticsearch instance; " +
-    "for example, localhost:9200.";
+    "for example, localhost:9200 or https://remote.region.gcp.cloud.es.io:9243.";
   private static final String INDEX_DESCRIPTION = "The name of the index to query.";
   private static final String TYPE_DESCRIPTION = "The name of the type where the data is stored.";
+  private static final String ADDITIONAL_PROPERTIES_DESCRIPTION = "Additional client properties for ES-Hadoop";
 
   @Name(HOST)
   @Description(HOST_DESCRIPTION)
@@ -52,11 +61,19 @@ public abstract class BaseElasticsearchConfig extends ReferencePluginConfig {
   @Macro
   private final String type;
 
-  public BaseElasticsearchConfig(String referenceName, String hostname, String index, String type) {
+  @Nullable
+  @Name(ADDITIONAL_PROPERTIES)
+  @Description(ADDITIONAL_PROPERTIES_DESCRIPTION)
+  @Macro
+  private final String additionalProperties;
+
+  public BaseElasticsearchConfig(String referenceName, String hostname, String index, String type,
+                                 String additionalProperties) {
     super(referenceName);
     this.hostname = hostname;
     this.index = index;
     this.type = type;
+    this.additionalProperties = additionalProperties;
   }
 
   public String getHostname() {
@@ -73,6 +90,28 @@ public abstract class BaseElasticsearchConfig extends ReferencePluginConfig {
 
   public String getResource() {
     return String.format("%s/%s", index, type);
+  }
+
+  @Nullable
+  public String getAdditionalProperties() {
+    return additionalProperties;
+  }
+
+  public Map<String, String> getAdditionalPropertiesMap() {
+    Map<String, String> propertiesMap = new HashMap<>();
+    if (additionalProperties == null || additionalProperties.trim().isEmpty()) {
+      return propertiesMap;
+    }
+
+    KeyValueListParser parser = new KeyValueListParser("\n", "=");
+    parser.parse(additionalProperties).forEach(kv -> {
+      if (kv.getKey().trim().isEmpty()) {
+        throw new IllegalArgumentException("Key should not be empty");
+      } else {
+        propertiesMap.put(kv.getKey().trim(), kv.getValue().trim());
+      }
+    });
+    return propertiesMap;
   }
 
   public void validate(FailureCollector collector) {
@@ -93,20 +132,33 @@ public abstract class BaseElasticsearchConfig extends ReferencePluginConfig {
     if (!containsMacro(TYPE_NAME) && Strings.isNullOrEmpty(type)) {
       collector.addFailure("Type must be specified.", null).withConfigProperty(TYPE_NAME);
     }
+
+    if (!containsMacro(ADDITIONAL_PROPERTIES)) {
+      try {
+        getAdditionalPropertiesMap();
+      } catch (Exception e) {
+        collector.addFailure("Additional properties must be a valid KV map", null)
+          .withConfigProperty(ADDITIONAL_PROPERTIES).withStacktrace(e.getStackTrace());
+      }
+    }
   }
 
   private void validateHost(FailureCollector collector) {
     String[] hostParts = hostname.split(":");
 
     // Elasticsearch Hadoop does not support IPV6 https://github.com/elastic/elasticsearch-hadoop/issues/1105
-    if (hostParts.length != 2) {
+    // Length range [2,3] allowed for https hosts
+    if ((hostParts.length < 2) || (hostParts.length > 3) || (hostParts.length == 3
+      && !(hostParts[0].equalsIgnoreCase("https") || hostParts[0].equalsIgnoreCase("http")))) {
+
       collector.addFailure(
         "Invalid format of hostname",
-        "Hostname and port must be specified for the Elasticsearch instance, for example: 'localhost:9200'"
+        "Hostname and port must be specified for the Elasticsearch instance, " +
+          "for example: 'localhost:9200' or https://remote.region.gcp.cloud.es.io:9243"
       ).withConfigProperty(HOST);
     } else {
-      String host = hostParts[0];
-      String port = hostParts[1];
+      String host = String.join(":", Arrays.asList(hostParts).subList(0, hostParts.length - 1));
+      String port = hostParts[hostParts.length - 1];
 
       if (host.isEmpty()) {
         collector.addFailure("Host should not be empty.", null)

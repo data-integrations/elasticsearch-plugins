@@ -37,13 +37,14 @@ public class ElasticsearchSinkConfig extends BaseElasticsearchConfig {
   @Macro
   private final String idField;
 
-  public ElasticsearchSinkConfig(String referenceName, String hostname, String index, String type, String idField) {
-    super(referenceName, hostname, index, type);
+  public ElasticsearchSinkConfig(String referenceName, String hostname, String index, String type, String idField,
+                                 String additionalProperties) {
+    super(referenceName, hostname, index, type, additionalProperties);
     this.idField = idField;
   }
 
   private ElasticsearchSinkConfig(Builder builder) {
-    super(builder.referenceName, builder.hostname, builder.index, builder.type);
+    super(builder.referenceName, builder.hostname, builder.index, builder.type, builder.additionalProperties);
     idField = builder.idField;
   }
 
@@ -58,6 +59,7 @@ public class ElasticsearchSinkConfig extends BaseElasticsearchConfig {
     builder.index = copy.getIndex();
     builder.type = copy.getType();
     builder.idField = copy.getIdField();
+    builder.additionalProperties = copy.getAdditionalProperties();
     return builder;
   }
 
@@ -82,6 +84,7 @@ public class ElasticsearchSinkConfig extends BaseElasticsearchConfig {
     private String index;
     private String type;
     private String idField;
+    private String additionalProperties;
 
     private Builder() {
     }
@@ -108,6 +111,11 @@ public class ElasticsearchSinkConfig extends BaseElasticsearchConfig {
 
     public Builder setIdField(String idField) {
       this.idField = idField;
+      return this;
+    }
+
+    public Builder setAdditionalProperties(String additionalProperties) {
+      this.additionalProperties = additionalProperties;
       return this;
     }
 
