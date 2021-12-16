@@ -82,7 +82,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cdap.version>6.1.1</cdap.version>
     <hadoop.version>2.3.0</hadoop.version>
-    <junit.version>4.11</junit.version>
+    <junit.version>4.13.1</junit.version>
     <hydrator.version>2.3.0-SNAPSHOT</hydrator.version>
     <es.version>7.6.2</es.version>
     <es-hadoop.version>7.6.2</es-hadoop.version>
