@@ -21,7 +21,7 @@
 
   <groupId>io.cdap.plugins</groupId>
   <artifactId>elasticsearch-plugins</artifactId>
-  <version>1.10.0-SNAPSHOT</version>
+  <version>1.11.0-SNAPSHOT</version>
 
   <licenses>
     <license>
@@ -69,29 +69,41 @@
 
   <repositories>
     <repository>
-      <id>sonatype.release</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>sonatype-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdap.version>6.1.1</cdap.version>
-    <hadoop.version>2.3.0</hadoop.version>
+    <cdap.version>6.11.0</cdap.version>
+    <hadoop.version>3.3.6</hadoop.version>
     <junit.version>4.11</junit.version>
-    <hydrator.version>2.3.0-SNAPSHOT</hydrator.version>
-    <es.version>7.6.2</es.version>
-    <es-hadoop.version>7.6.2</es-hadoop.version>
+    <hydrator.version>2.13.0</hydrator.version>
+    <es.version>9.0.0</es.version>
+    <es-hadoop.version>9.0.0</es-hadoop.version>
+    <es.client.version>7.17.28</es.client.version>
     <slf4j.version>1.7.5</slf4j.version>
-    <netty.version>4.0.30.Final</netty.version>
-    <log4j.version>2.16.0</log4j.version>
-    <logback.version>1.1.7</logback.version>
+    <netty.version>4.1.94.Final</netty.version>
+    <log4j.version>2.19.0</log4j.version>
+    <logback.version>1.2.11</logback.version>
     <commons.version>3.1</commons.version>
-    <junit.version>4.11</junit.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <!-- this is here because project.basedir evaluates to null in the script build step -->
     <main.basedir>${project.basedir}</main.basedir>
@@ -117,7 +129,7 @@
     </dependency>
     <dependency>
       <groupId>io.cdap.cdap</groupId>
-      <artifactId>cdap-data-pipeline</artifactId>
+      <artifactId>cdap-data-pipeline3_2.12</artifactId>
       <version>${cdap.version}</version>
       <scope>test</scope>
     </dependency>
@@ -135,6 +147,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.google.inject.extensions</groupId>
@@ -183,6 +199,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.avro</groupId>
@@ -252,13 +272,13 @@
     <dependency><!-- required by elasticsearch -->
       <groupId>org.elasticsearch.plugin</groupId>
       <artifactId>transport-netty4-client</artifactId>
-      <version>${es.version}</version>
+      <version>${es.client.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>transport</artifactId>
-      <version>${es.version}</version>
+      <version>${es.client.version}</version>
     </dependency>
     <dependency><!-- required by elasticsearch -->
       <groupId>org.apache.logging.log4j</groupId>
@@ -348,8 +368,8 @@
           <version>1.1.0</version>
           <configuration>
             <cdapArtifacts>
-              <parent>system:cdap-data-pipeline[6.1.1,7.0.0)</parent>
-              <parent>system:cdap-data-streams[6.1.1,7.0.0)</parent>
+              <parent>system:cdap-data-pipeline[6.11.0,7.0.0)</parent>
+              <parent>system:cdap-data-streams[6.11.0,7.0.0)</parent>
             </cdapArtifacts>
           </configuration>
           <executions>
