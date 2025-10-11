@@ -71,7 +71,7 @@
     <hadoop.version>3.3.6</hadoop.version>
     <junit.version>4.11</junit.version>
     <hydrator.version>2.13.0</hydrator.version>
-    <es.version>9.0.0</es.version>
+    <es.version>9.0.8</es.version>
     <es-hadoop.version>9.0.0</es-hadoop.version>
     <es.client.version>7.17.28</es.client.version>
     <slf4j.version>1.7.5</slf4j.version>
