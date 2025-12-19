@@ -76,7 +76,7 @@
     <es.client.version>7.17.28</es.client.version>
     <slf4j.version>1.7.5</slf4j.version>
     <netty.version>4.1.94.Final</netty.version>
-    <log4j.version>2.19.0</log4j.version>
+    <log4j.version>2.25.3</log4j.version>
     <logback.version>1.2.11</logback.version>
     <commons.version>3.1</commons.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
